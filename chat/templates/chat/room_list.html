@@ -1,0 +1,31 @@
+{% extends "chat/base.html" %}
+
+{% block title %}
+    Room List
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">Available Chat Rooms</h1>
+
+    <div class="row">
+        {% for room in rooms %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ room.name }}</h5>
+                        <p class="card-text text-muted">
+                            {{ room.message_set.count }} messages
+                        </p>
+                            <a href="{% url 'chat:room_detail' room.name %}" class="btn btn-primary">
+                            Enter Room
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">No rooms yet. Create one!</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

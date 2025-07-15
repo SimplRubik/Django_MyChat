@@ -1,0 +1,120 @@
+{% extends "chat/base.html" %}
+
+{% block title %}
+    Room: {{ room.name }}
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-black">Room: {{ room.name }}</h2>
+
+    <div id="chat-log" class="mb-3" style="max-height: 400px; overflow-y: auto;">
+        {% for msg in messages %}
+            <div class="card mb-2" style="
+                background-color: {% if msg.user == request.user %} rgba(13,110,253,0.8) {% else %} rgba(255,255,255,0.3) {% endif %};
+                color: {% if msg.user == request.user %} #fff {% else %} #000 {% endif %};
+                border: 1px solid rgba(0,0,0,0.2);
+            ">
+                <div class="card-body p-2">
+                    <div class="d-flex justify-content-between">
+                        <p class="mb-0">
+                            <span class="chat-username fw-bold">{{ msg.user.username }}</span>:
+                            <span class="chat-message">{{ msg.content }}</span>
+                        </p>
+                        <small class="text-muted">{{ msg.created_at|date:"H:i" }}</small>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p class="text-muted">No messages yet</p>
+        {% endfor %}
+    </div>
+
+    <div class="input-group">
+        <input id="chat-message-input" type="text" class="form-control" placeholder="Enter message">
+        <button id="chat-message-submit" class="btn btn-primary">Send</button>
+    </div>
+</div>
+
+{% if user.is_authenticated %}
+<script>
+    const roomName = "{{ room.name }}";
+    const username = "{{ request.user.username|escapejs }}";
+
+    let chatSocket = null;
+
+    try {
+        chatSocket = new WebSocket(
+            'ws://' + window.location.host +
+            '/ws/chat/' + roomName + '/'
+        );
+    } catch (e) {
+        console.error("Ошибка подключения к WebSocket:", e);
+    }
+
+    if (chatSocket) {
+        chatSocket.onmessage = function(e) {
+            try {
+                const data = JSON.parse(e.data);
+
+                const log = document.querySelector('#chat-log');
+                const isOwnMessage = data.username === username;
+
+                const card = document.createElement('div');
+                card.className = 'card mb-2';
+                card.style.backgroundColor = isOwnMessage ? 'rgba(13,110,253,0.8)' : 'rgba(255,255,255,0.3)';
+                card.style.color = isOwnMessage ? '#fff' : '#000';
+                card.style.border = '1px solid rgba(0,0,0,0.2)';
+
+                const body = document.createElement('div');
+                body.className = 'card-body p-2';
+
+                const header = document.createElement('div');
+                header.className = 'd-flex justify-content-between';
+
+                const userInfo = document.createElement('p');
+                userInfo.className = 'mb-0';
+                userInfo.innerHTML = `<span class="chat-username fw-bold">${data.username}</span>: <span class="chat-message">${data.message}</span>`;
+
+                const timeInfo = document.createElement('small');
+                timeInfo.className = 'text-muted';
+                timeInfo.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                header.appendChild(userInfo);
+                header.appendChild(timeInfo);
+                body.appendChild(header);
+                card.appendChild(body);
+
+                log.appendChild(card);
+                log.scrollTop = log.scrollHeight;
+
+            } catch (error) {
+                console.error("Ошибка обработки сообщения WebSocket:", e.data);
+                window.location.href = "/accounts/login/";
+            }
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Чат-соединение закрыто неожиданно');
+        };
+
+        document.querySelector('#chat-message-submit').onclick = function(e) {
+            const inputDom = document.querySelector('#chat-message-input');
+            const message = inputDom.value;
+
+            if (message.trim() !== "") {
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+                inputDom.value = '';
+            }
+        };
+    }
+</script>
+{% else %}
+<script>
+    // Если не залогинен — редиректим на логин
+    window.location.href = "/accounts/login/";
+</script>
+{% endif %}
+{% endblock %}
