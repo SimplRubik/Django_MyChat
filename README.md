@@ -65,7 +65,59 @@ cd django_chat
     daphne chat_project.asgi:application
     
 
+Simple Chat on Django and WebSocket (Channels) – built for practice and demonstration of real-time messaging between users.
 
+🚀 About the Project
+ • Built with Django 5.2.1 + Django Channels
+ • Uses WebSocket for real-time communication
+ • Redis connected via Docker for Channels support
+ • User authentication and registration
+ • WebSocket secured by authentication (only logged-in users can write in the chat)
+ • Auto-scroll to the bottom on new messages
+ • Bootstrap-styled interface
+ • Message cards with different colors (own messages vs. others)
+ • Message counter in rooms
+ • List of all chat rooms with links to enter each room
+ • Custom UI styling (colors, background, cards)
+ • Ability to create new users via registration form
+ • Logout with redirect to login page
+
+📝 Features
+✅ Real-time chat between users
+✅ List of chat rooms (Rooms)
+✅ Room detail pages with message history
+✅ Automatic scroll to the bottom on new messages
+✅ WebSocket connection via Django Channels
+✅ Redis integration via Docker
+✅ User authentication
+✅ User registration via form
+✅ Logout with redirect to login
+✅ Chat protection: only logged-in users can send messages
+✅ Beautiful Bootstrap interface
+✅ Message count in each room
+✅ Different colors for messages (yours vs. others)
+✅ Responsive design (works on mobile devices too)
+
+📦 Installation
+Clone the repository:
+git clone https://github.com/SimplRubik/Django_MyChat.git
+cd django_chat
+
+Create a virtual environment:
+python -m venv venv
+
+Activate the virtual environment:
+ • Windows: venv\Scripts\activate
+ • macOS/Linux: source venv/bin/activate
+
+Install the dependencies:
+pip install -r requirements.txt
+
+If Redis is not installed locally, run it in Docker:
+docker run -p 6379:6379 redis
+
+Run Daphne (ASGI server):
+daphne chat_project.asgi:application
 
   
 
